@@ -34,6 +34,17 @@ pipeline {
                 sshagent([SSH_CREDENTIAL]) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} '
+                            if ! command -v node &> /dev/null; then
+                                echo "Node.js not found, installing..."
+                                curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+                                sudo apt install -y nodejs
+                            fi
+
+                            if ! command -v pm2 &> /dev/null; then
+                                echo "pm2 not found, installing..."
+                                sudo npm install -g pm2
+                            fi
+
                             cd ${REMOTE_PATH} &&
                             npm install &&
                             pm2 start app.js --name node-app || pm2 restart node-app
@@ -53,6 +64,3 @@ pipeline {
         }
     }
 }
-
-
-
